@@ -1,0 +1,51 @@
+import sys
+from collections import Counter
+
+def get_kmers_from_file(filename, k=3):
+    try:
+        # Open the file
+        with open(filename, 'r') as f:
+            # Read the whole file, remove header lines (starting with >)
+            # and join lines into one long sequence string.
+            lines = f.readlines()
+            
+            # Filter out headers and newlines, then combine
+            sequence = "".join([line.strip() for line in lines if not line.startswith(">")])
+            sequence = sequence.upper() # Standardize to uppercase
+
+            if len(sequence) < k:
+                print(f"Error: Sequence length ({len(sequence)}) is shorter than k ({k}).")
+                return
+
+            # Generate k-mers
+            # This is the "Pythonic" list comprehension method
+            kmers = [sequence[i:i+k] for i in range(len(sequence) - k + 1)]
+            
+            # Count them
+            counts = Counter(kmers)
+            
+            # Print results
+            print(f"File: {filename}")
+            print(f"Total Unique {k}-mers: {len(counts)}")
+            print("-" * 30)
+            print(f"{'K-mer':<10} | Count")
+            print("-" * 30)
+            
+            # Sort by most common and print
+            for kmer, count in counts.most_common():
+                print(f"{kmer:<10} | {count}")
+
+    except FileNotFoundError:
+        print(f"Error: Could not find file '{filename}'")
+
+if __name__ == "__main__":
+    # Check if user provided a filename in the command line
+    if len(sys.argv) > 1:
+        target_file = sys.argv[1]
+    else:
+        # Default to seq.fa if no name is given
+        target_file = "seq.fa"
+        
+    get_kmers_from_file(target_file)
+
+
